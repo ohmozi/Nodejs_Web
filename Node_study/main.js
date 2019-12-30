@@ -4,6 +4,15 @@ var url = require('url');
 var qs = require('querystring');
 var template = require('./lib/templates.js');
 var path = require('path');
+var mysql = require('mysql');
+
+var db = mysql.createConnection({
+  host : 'localhost',
+  user : 'root',
+  password : 'oj950306!@',
+  database : 'opentutorials'
+});
+db.connect();
 
 var app = http.createServer(function(request, response){
     var _url = request.url;
@@ -26,6 +35,11 @@ var app = http.createServer(function(request, response){
           response.writeHead(200);
           response.end(html);
         });
+        // db.query(`SELECT * FROM topic`, function(error, topics){
+        //   console.log(topics);
+        //   response.writeHead(200);
+        //   response.end('Success');
+        // });
       } else{
         fs.readdir('./data', function(err, filelist){
           var fillteredId = path.parse(title).base;   // url공격을 막을수있다. 경로문제 해결
