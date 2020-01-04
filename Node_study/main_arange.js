@@ -1,185 +1,50 @@
-//모듈추가
 var http = require('http');
 var fs = require('fs');
-var qs = require('querystring')
 var url = require('url');
-//객체생성
-var template={
-  HTML:function (title,list,body,control){
-    return `<!doctype html>
-        <html>
-        <head>
-          <title>WEB1 - ${title}</title>
-          <meta charset="utf-8">
-        </head>
-        <body>
-          <h1><a href="/">WEB</a></h1>
-          ${list}
-          ${control}
-          ${body}
-        </body>
-        </html>
-    `;
-  },list:function (filelist){
-    var list ='<ul>';
-    var i =0;
-    while(i<filelist.length){
-      list = list+`<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-      i = i+1;
-    }
-    list = list +'</ul>';
-    return list;
-  }
+var qs = require('querystring');
+var template = require('./lib/templates.js');
+var path = require('path');
+var db = require('./lib/db.js');
+var topic = require('./lib/topic');
+var author = require('./lib/author');
 
-}
-
-
-var app = http.createServer(function(request,response){
+var app = http.createServer(function(request, response){
     var _url = request.url;
-    var queryData = url.parse(_url,true).query;
-    var pathname = url.parse(_url,true).pathname;
-    var title = queryData.id;
-    //console.log(url.parse(_url,true).pathname);
-    if(pathname ==='/'){
-      if(title === undefined){
-        fs.readdir('./data',function(error, filelist){
-          //console.log(filelist);
-          var title='Welcome';
-          var description = 'Hello world!';
-          var list = template.list(filelist);
-          var html = template.HTML(title,list,
-            `<h2>${title}</h2><p>${description}</p>`,
-            `<a href="/create">create</a>`
-          );
-
-          response.writeHead(200);
-          response.end(html);
-        });
+    var queryData = url.parse(_url, true).query;
+    var pathname = url.parse(_url, true).pathname;
+    console.log(pathname);
+    if(pathname === '/'){ // Q.현재는 간단한 패스를 갖기 때문에 이렇게 가능한 것 같은데 나중엔 어떻게 처리하는거지?
+      // 쿼리스트링이 없다면 welcome으로
+      if(queryData.id === undefined){
+        topic.home(request, response );
+      } else {
+        topic.page(request, response);
       }
-
-      else{
-          fs.readdir('./data',function(error, filelist){
-            fs.readFile(`data/${queryData.id}`, 'utf8', function(err,description){
-              var title = queryData.id;
-              var list = templatelist(filelist);
-              var template = templateHTML(title,list,
-                `<h2>${title}</h2><p>${description}</p>`,
-                `<a href="/create">create</a>
-                 <a href="/update?id=${title}">update</a>
-                 <form action="/delete_process" method="post" >
-                  <input type="hidden" name="id" value="${title}"><input type="submit" value="delete">
-                 </form>`
-               );
-              response.writeHead(200);
-              response.end(template);
-            });
-        });
-      }
+    } else if(pathname === '/create'){
+      topic.create(request, response);
+    } else if(pathname === '/process_create'){
+      topic.process_create(request, response);
+    } else if(pathname === '/update'){
+      topic.update(request, response);
+    } else if(pathname ==='/process_update'){
+      topic.process_update(request, response);
+    } else if(pathname === '/process_delete'){
+      topic.process_delete(request, response);
     }
-    else if(pathname === '/create'){
-      fs.readdir('./data',function(error, filelist){
-        var title='Web-create';
-        //var description = 'Hello world!';
-        var list = templatelist(filelist);
-        var template = templateHTML(title,list,`
-          <form action="/create_process" method="post">
-            <p><input type="text" name="title" placeholder="title"></p>
-            <p>
-              <textarea name='description' placeholder="description"></textarea>
-            </p>
-            <p>
-              <input type="submit">
-            </p>
-          </form>
-          `,'');
-        response.writeHead(200);
-        response.end(template);
-      });
-
-    }
-    /*
-    else if(pathname ==='/create_process'){
-      response.writeHead(200);
-      response.end('success');
-    }*/
-
-    else if(pathname ==='/create_process'){
-      var body='';
-      request.on('data',function(data){
-        body = body+data;
-      });
-      request.on('end',function(){
-        var post = qs.parse(body);
-        console.log(post)
-        var title = post.title;
-        var description = post.description;
-        fs.writeFile(`data/${title}`,description,'utf8',function(err){
-          response.writeHead(302,{Location:`/?id=${title}`});
-          response.end();
-        });
-        //console.log(post);
-      });
-    }
-    else if(pathname ==='/update_process'){
-      var body='';
-      request.on('data',function(data){
-        body = body+data;
-      });
-      request.on('end',function(){
-        var post = qs.parse(body);
-        var id = post.id;
-        var title = post.title;
-        var description = post.description;
-        fs.rename(`data/${id}`,`data/${title}`,function(error){
-          fs.writeFile(`data/${title}`,description,'utf8',function(err){
-            response.writeHead(302,{Location:`/?id=${title}`});
-            response.end();
-          });
-        });
-      });
-    }
-    else if(pathname ==='/delete_process'){
-      var body='';
-      request.on('data',function(data){
-        body = body+data;
-      });
-      request.on('end',function(){
-        var post = qs.parse(body);
-        var id = post.id;
-        fs.unlink(`data/${id}`,function(){
-          response.writeHead(302,{Location:"/"}
-        );
-          response.end(); //삭제 완료시 홈으로 보냄
-        });
-      });
-    }
-    else if(pathname ==='/update'){
-      fs.readdir('./data',function(error, filelist){
-        fs.readFile(`data/${queryData.id}`, 'utf8', function(err,description){
-          var title = queryData.id;
-          var list = templatelist(filelist);
-          var template = templateHTML(title,list,
-            `
-            <form action="/update_process" method="post">
-              <input type="hidden" name = "id" value="${title}">
-              <p><input type="text" name="title" placeholder="title" value="${title}"></p>
-              <p>
-                <textarea name='description' placeholder="description">${description}</textarea>
-              </p>
-              <p>
-                <input type="submit">
-              </p>
-            </form>
-            `,
-            `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`);
-          response.writeHead(200);
-          response.end(template);
-        });
-    });
-    }
-    else{
+//************  author part
+      else if(pathname === '/author_list'){
+      author.author_list(request, response);
+    } else if(pathname === '/process_author_create'){
+      author.process_author_create(request, response);
+    } else if(pathname === '/author_update'){
+      author.author_update(request, response);
+    } else if(pathname === '/process_author_update'){
+      author.process_author_update(request, response);
+    } else if(pathname === '/process_author_delete'){
+      author.process_author_delete(request, response);
+    } else{ // 잘못된 경로의 경우 not found출력
       response.writeHead(404);
-      response.end('Not Found');
+      response.end("Not found");
     }
 });
 app.listen(3000);

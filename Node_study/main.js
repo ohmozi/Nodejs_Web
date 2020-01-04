@@ -4,15 +4,7 @@ var url = require('url');
 var qs = require('querystring');
 var template = require('./lib/templates.js');
 var path = require('path');
-var mysql = require('mysql');
-
-var db = mysql.createConnection({
-  host : 'localhost',
-  user : 'root',
-  password : 'oj950306!@',
-  database : 'opentutorials'
-});
-db.connect();
+var db = require('./lib/db.js');
 
 var app = http.createServer(function(request, response){
     var _url = request.url;
@@ -43,11 +35,11 @@ var app = http.createServer(function(request, response){
         db.query(`SELECT * FROM topic`, function(error, topics){
           var title = 'Welcome';
           var description = 'Hello,Node.js';
-          var list = template.list(topics);
+          var list = template.db_list(topics);
           var html = template.HTML(title, list,
             `<h2>${title}</h2><p>${description}</p>`,
             `<a href="/create">create</a>`,
-            );
+            '');
           response.writeHead(200);
           response.end(html);
         });
@@ -89,7 +81,7 @@ var app = http.createServer(function(request, response){
             var title = topics2[0].title;
             var author = topics2[0].name;
             var description = topics2[0].description;
-            var list = template.list(topics);
+            var list = template.db_list(topics);
             var html = template.HTML(title, list,
               `
               <h2>${title}</h2>
@@ -106,8 +98,8 @@ var app = http.createServer(function(request, response){
               function delete(){
                 alert("delete complete!!");
               }
-              </script>`
-              );
+              </script>`,
+              '');
             response.writeHead(200);
             response.end(html);
           });
@@ -145,7 +137,7 @@ var app = http.createServer(function(request, response){
         }
         db.query(`SELECT * FROM author`, function(error2, authors){
           var title = "create"
-          var list = template.list(topics);
+          var list = template.db_list(topics);
           var html = template.HTML(title, list,
           `
             <form action="/process_create" method="POST">
@@ -160,7 +152,7 @@ var app = http.createServer(function(request, response){
               <input type="submit">
             </p>
             </form>
-          `, '');
+          `, '','');
           response.writeHead(200);
           response.end(html);
         });
@@ -208,7 +200,7 @@ var app = http.createServer(function(request, response){
                 throw error2;
               }
               console.log(result[0].author_id);
-              var list = template.list(topics);
+              var list = template.db_list(topics);
               var html = template.HTML(result[0].title, list,
                 `
                   <form action="/process_update" method="POST">
@@ -226,8 +218,8 @@ var app = http.createServer(function(request, response){
                   </form>
                 `,
                 ` <a href="/create">create</a>
-                  <a href="/update?id=${result[0].id}">update</a>`
-                );
+                  <a href="/update?id=${result[0].id}">update</a>`,
+                '');
               response.writeHead(200);
               response.end(html);
             });

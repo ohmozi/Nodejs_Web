@@ -1,5 +1,5 @@
 module.exports = {
-  HTML: function (title, list, body, control){
+  HTML: function (title, db_list, body, control, author_list){
     return `
     <!doctype html>
     <html>
@@ -9,13 +9,15 @@ module.exports = {
     </head>
     <body>
       <h1><a href="/">WEB</a></h1>
-      ${list}
+      <p><a href="/author_list">author</a></p>
+      ${db_list}
       ${control}
       ${body}
+      ${author_list}
     </body>
     </html>
     `;
-  },list:function (topics){
+  },db_list:function (topics){
     /*
     var list = `
     <ol>  <!-- 파일이 추가되거나 변경될 때 빠르게 수정이 가능하도록 변경이 필요하다 -->
@@ -50,5 +52,26 @@ module.exports = {
       ${tag}
     </select>
     `;
+  },author_list:function(authors, form){
+    var list = '<ul>';
+    var i = 0;
+    while(i < authors.length){
+      list += `<li>${authors[i].name} / ${authors[i].profile}
+      <a href="/author_update?author_id=${authors[i].id}">update</a>
+      <form action="/process_author_delete" method="post" onsubmit="delete()">
+        <input type="hidden" name="id" value="${authors[i].id}">
+        <input type="submit" value="delete">
+      </form>
+      <script>
+      function delete(){
+        alert("delete complete!!");
+      }
+      </script>
+      </li>`;
+      i++;
+    }
+    list += '</ul>'
+    list += form;
+    return list;
   }
 }
