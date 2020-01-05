@@ -53,24 +53,46 @@ module.exports = {
     </select>
     `;
   },author_list:function(authors, form){
-    var list = '<ul>';
+    var list = `
+    <table>
+      <tr>
+        <td>name</td>
+        <td>profile</td>
+        <td>update</td>
+        <td>delete</td>
+      </tr>
+    `;
     var i = 0;
     while(i < authors.length){
-      list += `<li>${authors[i].name} / ${authors[i].profile}
-      <a href="/author_update?author_id=${authors[i].id}">update</a>
-      <form action="/process_author_delete" method="post" onsubmit="delete()">
-        <input type="hidden" name="id" value="${authors[i].id}">
-        <input type="submit" value="delete">
-      </form>
-      <script>
+      list += `
+      <tr>
+        <td>${authors[i].name}</td>
+        <td>${authors[i].profile}</td>
+        <td><a href="/author_update?author_id=${authors[i].id}">update</a></td>
+        <td>
+          <form action="/process_author_delete" method="post" onsubmit="delete()">
+            <input type="hidden" name="id" value="${authors[i].id}">
+            <input type="submit" value="delete">
+          </form>
+        </td>
+      </tr>`;
+      i++;
+    }
+    list += `
+    </table>
+    <script>
       function delete(){
         alert("delete complete!!");
       }
-      </script>
-      </li>`;
-      i++;
-    }
-    list += '</ul>'
+    </script>
+    <style>
+      table{
+        border-collapse:collapse;
+      }
+      td{
+        border:1px solid black;
+      }
+    </style>`;
     list += form;
     return list;
   }
