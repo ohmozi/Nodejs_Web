@@ -85,7 +85,7 @@ exports.page = function(request, response){
         `,
         `<a href="/create">create</a>
         <a href="/update?id=${queryData.id}">update</a>
-        <form action="/process_delete" method="post" onsubmit="delete()">
+        <form action="/process_delete" method="post" onsubmit="delete();">
           <input type="hidden" name="id" value="${queryData.id}">
           <input type="submit" value="delete">
         </form>

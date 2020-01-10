@@ -6,8 +6,33 @@ module.exports = {
     <head>
       <title>WEB1 - ${title}</title>
       <meta charset="utf-8">
+      <script>
+      function nightDayHandler(self){
+        var target = document.querySelector('body');
+        if(self.value === 'night'){
+          target.style.backgroundColor='black';
+          target.style.color='white';
+          self.value='day';
+        } else{
+          target.style.backgroundColor='white';
+          target.style.color='black';
+          self.value='night';
+        }
+      }
+      </script>
     </head>
     <body>
+      <!--
+        <input type="button" value="night" onclick="
+          document.querySelector('body').style.backgroundColor='black';
+          document.querySelector('body').style.color='white';
+        ">
+        <input type="button" value="day" onclick="
+          document.querySelector('body').style.backgroundColor='white';
+          document.querySelector('body').style.color='black';
+        ">
+      -->
+      <input type="button" value="night" onclick="nightDayHandler(this);">
       <h1><a href="/">WEB</a></h1>
       <p><a href="/author_list">author</a></p>
       ${db_list}
@@ -41,7 +66,7 @@ module.exports = {
     var i =0;
     while(i < authors.length){
       var selected = '';
-      if( authors[i].id === author_id){
+      if(authors[i].id === author_id){
         selected = 'selected';
       }
       tag += `<option value="${authors[i].id}" ${selected}>${authors[i].name}</option>`;
