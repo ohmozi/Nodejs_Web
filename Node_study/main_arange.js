@@ -7,6 +7,7 @@ var path = require('path');
 var db = require('./lib/db.js');
 var topic = require('./lib/topic');
 var author = require('./lib/author');
+var login = require('./lib/login');
 
 var app = http.createServer(function(request, response){
     var _url = request.url;
@@ -14,7 +15,6 @@ var app = http.createServer(function(request, response){
     var pathname = url.parse(_url, true).pathname;
     console.log(pathname);
     if(pathname === '/'){ // Q.현재는 간단한 패스를 갖기 때문에 이렇게 가능한 것 같은데 나중엔 어떻게 처리하는거지?
-      // 쿼리스트링이 없다면 welcome으로
       if(queryData.id === undefined){
         topic.home(request, response );
       } else {
@@ -42,9 +42,19 @@ var app = http.createServer(function(request, response){
       author.process_author_update(request, response);
     } else if(pathname === '/process_author_delete'){
       author.process_author_delete(request, response);
-    } else{ // 잘못된 경로의 경우 not found출력
+    }
+//*********** login part
+      else if(pathname ==='/login'){
+      login.login(request, response);
+    } else if(pathname ==='/process_login'){
+      login.process_login(request, response);
+    } else if(pathname ==='/join'){
+      login.join(request, response);
+    } else if(pathname ==='/process_join'){
+      login.process_join(request, response);
+    }else{
       response.writeHead(404);
-      response.end("Not found");
+      response.end("Not found");  // 잘못된 경로의 경우 not found출력
     }
 });
 app.listen(3000);

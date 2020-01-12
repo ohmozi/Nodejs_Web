@@ -29,7 +29,7 @@ exports.home = function(request, response){
     var html = template.HTML(title, list,
       `<h2>${title}</h2><p>${description}</p>`,
       `<a href="/create">create</a>`,
-      '');
+      '<a href="/login">login</a>');
     response.writeHead(200);
     response.end(html);
   });
