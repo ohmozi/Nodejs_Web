@@ -4,6 +4,15 @@ var url = require('url');
 var qs = require('querystring');
 var cookie = require('cookie'); //쿠키를 파싱할 수 있음
 
+function authIsSession(request, response){
+  //세션으로 접근하자
+    if(request.session.is_logined){
+      return true;
+    } else{
+      return false;
+    }
+}
+
 function authIsOwner(request, response){
   var isOwner = false;
   //쿠키에 접근하자
@@ -17,10 +26,11 @@ function authIsOwner(request, response){
   }
   return isOwner;
 }
+
 function authStatusUI(request, response){
   var authStatusUI = '<a href="/login/login">login</a>'
-  if(authIsOwner(request, response)){
-    authStatusUI = '<a href="/login/process_logout">logout</a>'
+  if(authIsSession(request, response)){
+    authStatusUI = `${request.session.nickname} | <a href="/login/process_logout">logout</a>`;
   }
   return authStatusUI;
 }
@@ -112,7 +122,7 @@ exports.create = function(request, response){
 }
 
 exports.process_create = function(request, response){
-  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+  if(authIsSession(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
     response.end('login required!');
     return false;
   }
@@ -175,7 +185,7 @@ exports.update = function(request, response){
 }
 
 exports.process_update = function(request, response){
-  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+  if(authIsSession(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
     response.end('login required!');
     return false;
   }
@@ -195,7 +205,7 @@ exports.process_update = function(request, response){
 }
 
 exports.process_delete = function(request, response){
-  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+  if(authIsSession(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
     response.end('login required!');
     return false;
   }

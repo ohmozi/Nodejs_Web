@@ -33,16 +33,16 @@ exports.process_login = function(request, response){
   // 아이디 자체가 존재하지 않거나 틀리면 어떻게 처리하는가?************************ 해결하고싶다
   db.query(`SELECT EXISTS (select * from user where email=?) as success`,[post.email],function(err, succ){
     // console.log(succ[0].success);
-    if(succ[0].success === 1){
-      db.query(`SELECT password FROM user WHERE email=? `, [post.email], function(error, result){
+    if(succ[0].success === 1){    //이메일이 존재하는지 확인
+      db.query(`SELECT * FROM user WHERE email=? `, [post.email], function(error, result){
         if(result[0].password === post.password){
           console.log(request.session);
           request.session.is_logined = true;
-          request.session.nickname = 'oziozi';
+          request.session.nickname = result[0].name;  //닉네임은 입력받으면 사용가능
 
-          response.cookie('email', post.email);
-          response.cookie('password', post.password);
-          response.cookie('nickname', 'ozi');   //=> 쿠키여러개 만드려면 배열 못하나?
+          // response.cookie('email', post.email);
+          // response.cookie('password', post.password);
+          // response.cookie('nickname', 'ozi');   //=> 쿠키여러개 만드려면 배열 못하나?
 
           request.session.save(function(){
             response.redirect(302, '/');
@@ -58,7 +58,7 @@ exports.process_login = function(request, response){
           response.redirect(302, '/login/login');  //알람을 띄우고싶은데 어떻게하지?
         }
       });
-    } else {
+    } else {    //이메일자체가 존재하지 않다면
       response.send("Email does not exist!");
     }
   });
@@ -99,21 +99,24 @@ exports.process_join = function(request, response){
 }
 
 exports.process_logout = function(request, response){
-  request.session.destory(function(err){
-    response.clearCookie('email');
-    response.clearCookie('password');
-    response.clearCookie('nickname');
+  console.log("before");
+  request.session.destroy(function(err){
+    // response.clearCookie('email');
+    // response.clearCookie('password');
+    // response.clearCookie('nickname');
     response.redirect(302, '/');
-  })
+  });
+  console.log("after");
+
   // response.cookie('email', '', {magAge:0});
   // response.cookie('password', '', {magAge:0});
   // response.cookie('nickname', '', {magAge:0});   //=> 쿠키여러개 만드려면 배열 못하나?
-  response.redirect(302, '/');
+  // response.redirect(302, '/');
   // response.writeHead(302, {
   //   'Set-Cookie' : [
   //     `email=; Max-Age=0`,
   //     `password=; Max-Age=0`,
   //     `nickname=; Max-Age=0`
   //   ], Location: '/'});
-  response.end();
+  // response.end();
 }
