@@ -2,6 +2,28 @@ var db = require('./db.js');
 var template = require('./templates.js');
 var url = require('url');
 var qs = require('querystring');
+var cookie = require('cookie'); //쿠키를 파싱할 수 있음
+
+function authIsOwner(request, response){
+  var isOwner = false;
+  //쿠키에 접근하자
+  var cookies = {}
+  if(request.headers.cookie){
+    cookies = cookie.parse(request.headers.cookie);
+  }
+  console.log(cookies);
+  if(cookies.email ==='go@naver.com' && cookies.password ==='1212'){
+    isOwner = true;
+  }
+  return isOwner;
+}
+function authStatusUI(request, response){
+  var authStatusUI = '<a href="/login">login</a>'
+  if(authIsOwner(request, response)){
+    authStatusUI = '<a href="/process_logout">logout</a>'
+  }
+  return authStatusUI;
+}
 
 exports.home = function(request, response){
   //**** 파일시스템으로써 데이터 관리
@@ -29,7 +51,8 @@ exports.home = function(request, response){
     var html = template.HTML(title, list,
       `<h2>${title}</h2><p>${description}</p>`,
       `<a href="/create">create</a>`,
-      '<a href="/login">login</a>');
+      '',
+      authStatusUI(request, response));
     response.writeHead(200);
     response.end(html);
   });
@@ -94,7 +117,8 @@ exports.page = function(request, response){
           alert("delete complete!!");
         }
         </script>`,
-        '');
+        '',
+        authStatusUI(request, response));
       response.writeHead(200);
       response.end(html);
     });
@@ -148,7 +172,8 @@ exports.create = function(request, response){
           <input type="submit">
         </p>
         </form>
-      `, '','');
+      `, '','',
+      authStatusUI(request, response));
       response.writeHead(200);
       response.end(html);
     });
@@ -157,6 +182,10 @@ exports.create = function(request, response){
 }
 
 exports.process_create = function(request, response){
+  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+    response.end('login required!');
+    return false;
+  }
   var body = '';
   //***** event
   request.on('data', function(data){
@@ -222,7 +251,8 @@ exports.update = function(request, response){
           `,
           ` <a href="/create">create</a>
             <a href="/update?id=${result[0].id}">update</a>`,
-          '');
+          '',
+          authStatusUI(request, response));
         response.writeHead(200);
         response.end(html);
       });
@@ -256,6 +286,10 @@ exports.update = function(request, response){
 }
 
 exports.process_update = function(request, response){
+  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+    response.end('login required!');
+    return false;
+  }
   var body = '';
   request.on('data', function(data){
     body = body + data;
@@ -285,6 +319,10 @@ exports.process_update = function(request, response){
 }
 
 exports.process_delete = function(request, response){
+  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+    response.end('login required!');
+    return false;
+  }
   var body = '';
   request.on('data', function(data){
     body = body + data;

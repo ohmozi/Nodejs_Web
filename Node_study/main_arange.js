@@ -9,6 +9,7 @@ var topic = require('./lib/topic');
 var author = require('./lib/author');
 var login = require('./lib/login');
 
+
 var app = http.createServer(function(request, response){
     var _url = request.url;
     var queryData = url.parse(_url, true).query;
@@ -52,7 +53,9 @@ var app = http.createServer(function(request, response){
       login.join(request, response);
     } else if(pathname ==='/process_join'){
       login.process_join(request, response);
-    }else{
+    } else if(pathname ==='/process_logout'){
+      login.process_logout(request, response);
+    } else{
       response.writeHead(404);
       response.end("Not found");  // 잘못된 경로의 경우 not found출력
     }

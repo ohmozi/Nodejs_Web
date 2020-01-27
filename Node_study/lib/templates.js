@@ -1,5 +1,6 @@
+
 module.exports = {
-  HTML: function (title, db_list, body, control, author_list){
+  HTML: function (title, db_list, body, control, author_list, authStatusUI = '<a href="/login">login</a>'){
     return `
     <!doctype html>
     <html>
@@ -33,6 +34,7 @@ module.exports = {
         ">
       -->
       <input type="button" value="night" onclick="nightDayHandler(this);">
+      ${authStatusUI}
       <h1><a href="/">WEB</a></h1>
       <p><a href="/author_list">author</a></p>
       ${db_list}

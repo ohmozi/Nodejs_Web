@@ -2,8 +2,30 @@ var db = require('./db.js');
 var template = require('./templates.js');
 var url = require('url');
 var qs = require('querystring');
+var cookie = require('cookie'); //쿠키를 파싱할 수 있음
 
-exports.author_list = function(reqeust, response){
+function authIsOwner(request, response){
+  var isOwner = false;
+  //쿠키에 접근하자
+  var cookies = {}
+  if(request.headers.cookie){
+    cookies = cookie.parse(request.headers.cookie);
+  }
+  console.log(cookies);
+  if(cookies.email ==='go@naver.com' && cookies.password ==='1212'){
+    isOwner = true;
+  }
+  return isOwner;
+}
+function authStatusUI(request, response){
+  var authStatusUI = '<a href="/login">login</a>'
+  if(authIsOwner(request, response)){
+    authStatusUI = '<a href="/process_logout">logout</a>'
+  }
+  return authStatusUI;
+}
+
+exports.author_list = function(request, response){
   db.query(`SELECT * FROM topic`, function(error, topics){
     if(error){
       throw error;
@@ -25,7 +47,7 @@ exports.author_list = function(reqeust, response){
           </p>
           </form>
         `);
-      var html = template.HTML('', db_list,'<h2>Author List</h2>','',author_list);
+      var html = template.HTML('', db_list,'<h2>Author List</h2>','',author_list, authStatusUI(request, response));
       response.writeHead(200);
       response.end(html);
     })
@@ -33,6 +55,10 @@ exports.author_list = function(reqeust, response){
 }
 
 exports.process_author_create = function(request, response){
+  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+    response.end('login required!');
+    return false;
+  }
   var body = '';
   //***** event
   request.on('data', function(data){
@@ -81,7 +107,7 @@ exports.author_update = function(request, response){
           <p><input type="submit" value="update"></p>
           </from>
           `);
-        var html = template.HTML(title, db_list,'<h2>Author List</h2>','',author_list);
+        var html = template.HTML(title, db_list,'<h2>Author List</h2>','',author_list,authStatusUI(request, response));
         response.writeHead(200);
         response.end(html);
       });
@@ -90,6 +116,10 @@ exports.author_update = function(request, response){
 }
 
 exports.process_author_update = function(request, response){
+  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+    response.end('login required!');
+    return false;
+  }
   var body = '';
   //***** event
   request.on('data', function(data){
@@ -110,6 +140,10 @@ exports.process_author_update = function(request, response){
 }
 
 exports.process_author_delete= function(request, response){
+  if(authIsOwner(request, response) === false){   // 로그인 안 되어있으면 생성, 업데이트, 삭제 불가
+    response.end('login required!');
+    return false;
+  }
   var body = '';
   //***** event
   request.on('data', function(data){

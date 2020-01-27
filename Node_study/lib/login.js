@@ -32,14 +32,19 @@ exports.process_login = function(request, response){
   });
   request.on('end', function(){
     var post = qs.parse(body)
+    // 아이디 자체가 존재하지 않거나 틀리면 어떻게 처리하는가?
     db.query(`SELECT password FROM user WHERE email=? `, [post.email], function(error, result){
       if(result[0].password == post.password){
-        response.writeHead(302, {Location: '/'});
-        response.end();
+        response.writeHead(302, {
+          'Set-Cookie' : [
+            `email=${post.email}`,
+            `password=${post.password}`,
+            `nickname=ozi`
+          ], Location: '/'});
       } else{
-        response.writeHead(302, {Location: '/login'});
-        response.end();
+        response.writeHead(302, {Location: '/login'});  //알람을 띄우고싶은데 어떻게하지?
       }
+      response.end();
     });
   });
 }
@@ -86,4 +91,13 @@ exports.process_join = function(request, response){
   });
 
 }
-// where부터 체크하는 부분 로그인 시작
+
+exports.process_logout = function(request, response){
+  response.writeHead(302, {
+    'Set-Cookie' : [
+      `email=; Max-Age=0`,
+      `password=; Max-Age=0`,
+      `nickname=; Max-Age=0`
+    ], Location: '/'});
+  response.end();
+}
