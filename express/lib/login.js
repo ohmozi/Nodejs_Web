@@ -36,7 +36,7 @@ exports.process_login = function(request, response){
     if(succ[0].success === 1){    //이메일이 존재하는지 확인
       db.query(`SELECT * FROM user WHERE email=? `, [post.email], function(error, result){
         if(result[0].password === post.password){
-          console.log(request.session);
+          // console.log(request.session);
           request.session.is_logined = true;
           request.session.nickname = result[0].name;  //닉네임은 입력받으면 사용가능
 

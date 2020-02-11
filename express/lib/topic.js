@@ -36,6 +36,7 @@ function authStatusUI(request, response){
 }
 
 exports.home = function(request, response){
+  console.log("/", request.user);     //request.무엇을 해야 받아지는지?
   db.query(`SELECT * FROM topic`, function(error, topics){
     var title = 'Welcome';
     var description = 'Hello,Node.js';
